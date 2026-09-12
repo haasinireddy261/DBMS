@@ -7,11 +7,23 @@ const resetBtn = document.getElementById('resetBtn');
 const dateOfBirthInput = document.getElementById('dateOfBirth');
 const ageInput = document.getElementById('age');
 const appointmentDateInput = document.getElementById('appointmentDate');
+const successSection = document.getElementById('success-section');
+const staffLoginForm = document.getElementById('staffLoginForm');
+const staffDashboardSection = document.getElementById('staffDashboardSection');
+const staffLoginCard = document.getElementById('staffLoginCard');
+const staffUserName = document.getElementById('staffUserName');
+const staffLogoutBtn = document.getElementById('staffLogoutBtn');
+const appointmentTableBody = document.getElementById('appointmentTableBody');
+const patientDetailModal = document.getElementById('patientDetailModal');
+const patientDetailBody = document.getElementById('patientDetailBody');
 
 const API_BASE_URL = 'http://localhost:3000';
 
 let patients = [];
+let appointments = [];
 let editingPatientId = null;
+let staffToken = localStorage.getItem('patientcare_staff_token') || '';
+let currentStaff = JSON.parse(localStorage.getItem('patientcare_staff_user') || 'null');
 
 function calculateAge(dateString) {
   if (!dateString) {
@@ -80,6 +92,8 @@ function clearAllErrors() {
 }
 
 function showAlert(message, type) {
+  if (!formAlert) return;
+
   formAlert.className = `alert alert-${type}`;
   formAlert.textContent = message;
   formAlert.classList.remove('d-none');
@@ -260,18 +274,30 @@ function fillForm(patient) {
 }
 
 function resetForm() {
-  patientForm.reset();
+  if (patientForm) {
+    patientForm.reset();
+  }
   clearAllErrors();
   editingPatientId = null;
-  submitBtn.textContent = 'Register Patient';
-  submitBtn.classList.remove('btn-warning');
-  submitBtn.classList.add('btn-primary');
-  ageInput.value = '';
-  const today = new Date();
-  appointmentDateInput.value = today.toISOString().split('T')[0];
+  if (submitBtn) {
+    submitBtn.textContent = 'Register Patient';
+    submitBtn.classList.remove('btn-warning');
+    submitBtn.classList.add('btn-primary');
+  }
+  if (ageInput) {
+    ageInput.value = '';
+  }
+  if (appointmentDateInput) {
+    const today = new Date();
+    appointmentDateInput.value = today.toISOString().split('T')[0];
+  }
 }
 
 function updateSummary() {
+  const totalPatientsValue = document.getElementById('totalPatients');
+  const todayAppointmentsValue = document.getElementById('todayAppointments');
+  const totalDepartmentsValue = document.getElementById('totalDepartments');
+
   const totalPatients = patients.length;
   const today = new Date().toISOString().split('T')[0];
   const todaysAppointments = patients.filter(
@@ -284,14 +310,15 @@ function updateSummary() {
       .filter((department) => department)
   );
 
-  document.getElementById('totalPatients').textContent = totalPatients;
-  document.getElementById('todayAppointments').textContent = todaysAppointments;
-  document.getElementById('totalDepartments').textContent = departments.size;
+  if (totalPatientsValue) totalPatientsValue.textContent = totalPatients;
+  if (todayAppointmentsValue) todayAppointmentsValue.textContent = todaysAppointments;
+  if (totalDepartmentsValue) totalDepartmentsValue.textContent = departments.size;
 }
 
 function renderPatients(searchText = '') {
-  const searchValue = searchText.toLowerCase().trim();
+  if (!patientTableBody) return;
 
+  const searchValue = searchText.toLowerCase().trim();
   const filteredPatients = patients.filter((patient) => {
     const searchTarget = `${patient.name} ${patient.patientId}`.toLowerCase();
     return searchTarget.includes(searchValue);
@@ -319,10 +346,40 @@ function renderPatients(searchText = '') {
           <td>${patient.appointmentDate}</td>
           <td>
             <div class="action-btns">
+              <button class="btn btn-sm btn-info view-btn" data-id="${patient.patientId}">View</button>
               <button class="btn btn-sm btn-warning edit-btn" data-id="${patient.patientId}">Edit</button>
               <button class="btn btn-sm btn-danger delete-btn" data-id="${patient.patientId}">Delete</button>
             </div>
           </td>
+        </tr>
+      `
+    )
+    .join('');
+}
+
+function renderAppointments(appointmentList = []) {
+  if (!appointmentTableBody) return;
+
+  if (appointmentList.length === 0) {
+    appointmentTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center text-muted py-4">No appointments found.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  appointmentTableBody.innerHTML = appointmentList
+    .map(
+      (appointment) => `
+        <tr>
+          <td>${appointment.appointmentId}</td>
+          <td>${appointment.patientName || '-'}</td>
+          <td>${appointment.department || '-'}</td>
+          <td>${appointment.doctor || '-'}</td>
+          <td>${appointment.appointmentDate || '-'}</td>
+          <td>${appointment.appointmentTime || '-'}</td>
+          <td>${appointment.status || 'Scheduled'}</td>
         </tr>
       `
     )
@@ -338,12 +395,38 @@ async function loadPatients() {
     }
 
     patients = await response.json();
-    renderPatients(searchInput.value);
+    if (searchInput) {
+      renderPatients(searchInput.value);
+    }
     updateSummary();
   } catch (error) {
     console.error('Error loading patients:', error);
-    showAlert('Unable to load patient records from the database.', 'danger');
+    if (formAlert) {
+      showAlert('Unable to load patient records from the database.', 'danger');
+    }
   }
+}
+
+function showSuccessCard(payload) {
+  const successPatientId = document.getElementById('successPatientId');
+  const successPatientName = document.getElementById('successPatientName');
+  const successDepartment = document.getElementById('successDepartment');
+  const successAppointmentDate = document.getElementById('successAppointmentDate');
+  const successAppointmentTime = document.getElementById('successAppointmentTime');
+
+  if (successPatientId) successPatientId.textContent = payload.patientId || '-';
+  if (successPatientName) successPatientName.textContent = payload.name || '-';
+  if (successDepartment) successDepartment.textContent = payload.department || '-';
+  if (successAppointmentDate) successAppointmentDate.textContent = payload.appointmentDate || '-';
+  if (successAppointmentTime) successAppointmentTime.textContent = payload.appointmentTime || '-';
+
+  if (patientForm) patientForm.closest('section').classList.add('d-none');
+  if (successSection) successSection.classList.remove('d-none');
+}
+
+function hideSuccessCard() {
+  if (successSection) successSection.classList.add('d-none');
+  if (patientForm) patientForm.closest('section').classList.remove('d-none');
 }
 
 async function savePatient(event) {
@@ -376,6 +459,10 @@ async function savePatient(event) {
       throw new Error(data.message || 'Request failed.');
     }
 
+    if (!editingPatientId) {
+      showSuccessCard(data);
+    }
+
     showToast(data.message || 'Patient details saved successfully.', 'success');
     resetForm();
     await loadPatients();
@@ -393,9 +480,11 @@ function editPatient(patientId) {
 
   editingPatientId = patientId;
   fillForm(patient);
-  submitBtn.textContent = 'Update Patient';
-  submitBtn.classList.remove('btn-primary');
-  submitBtn.classList.add('btn-warning');
+  if (submitBtn) {
+    submitBtn.textContent = 'Update Patient';
+    submitBtn.classList.remove('btn-primary');
+    submitBtn.classList.add('btn-warning');
+  }
   window.location.hash = '#registration-form';
 }
 
@@ -414,6 +503,9 @@ function deletePatient(patientId) {
         showToast(data.message || 'Patient record deleted successfully.', 'danger');
         if (editingPatientId === patientId) resetForm();
         loadPatients();
+        if (staffToken) {
+          loadStaffDashboard();
+        }
       })
       .catch((error) => {
         console.error('Delete error:', error);
@@ -429,8 +521,44 @@ function deletePatient(patientId) {
   bsModal.show();
 }
 
+function openPatientDetails(patientId) {
+  const patient = patients.find((item) => item.patientId === patientId);
+  if (!patient || !patientDetailBody || !patientDetailModal) return;
+
+  patientDetailBody.innerHTML = `
+    <div class="row g-3">
+      <div class="col-md-6"><strong>Patient ID:</strong> ${patient.patientId || '-'}</div>
+      <div class="col-md-6"><strong>Name:</strong> ${patient.name || '-'}</div>
+      <div class="col-md-6"><strong>Date of Birth:</strong> ${patient.dateOfBirth || '-'}</div>
+      <div class="col-md-6"><strong>Age:</strong> ${patient.age || '-'}</div>
+      <div class="col-md-6"><strong>Gender:</strong> ${patient.gender || '-'}</div>
+      <div class="col-md-6"><strong>Phone:</strong> ${patient.phone || '-'}</div>
+      <div class="col-md-6"><strong>Email:</strong> ${patient.email || '-'}</div>
+      <div class="col-md-6"><strong>Blood Group:</strong> ${patient.bloodGroup || '-'}</div>
+      <div class="col-md-12"><strong>Address:</strong> ${patient.address || '-'}</div>
+      <div class="col-md-6"><strong>Emergency Contact:</strong> ${patient.emergencyContact || '-'}</div>
+      <div class="col-md-6"><strong>Emergency Contact Phone:</strong> ${patient.emergencyContactPhone || '-'}</div>
+      <div class="col-md-6"><strong>Allergies:</strong> ${patient.allergies || '-'}</div>
+      <div class="col-md-6"><strong>Medical Conditions:</strong> ${patient.medicalConditions || '-'}</div>
+      <div class="col-md-6"><strong>Reason for Visit:</strong> ${patient.reasonForVisit || '-'}</div>
+      <div class="col-md-6"><strong>Department:</strong> ${patient.department || '-'}</div>
+      <div class="col-md-6"><strong>Doctor:</strong> ${patient.doctor || '-'}</div>
+      <div class="col-md-6"><strong>Appointment Date:</strong> ${patient.appointmentDate || '-'}</div>
+      <div class="col-md-6"><strong>Appointment Time:</strong> ${patient.appointmentTime || '-'}</div>
+    </div>
+  `;
+
+  const modal = new bootstrap.Modal(patientDetailModal);
+  modal.show();
+}
+
 function handleTableActions(event) {
   const target = event.target;
+
+  if (target.classList.contains('view-btn')) {
+    const patientId = target.getAttribute('data-id');
+    openPatientDetails(patientId);
+  }
 
   if (target.classList.contains('edit-btn')) {
     const patientId = target.getAttribute('data-id');
@@ -448,16 +576,145 @@ function handleDobChange() {
   ageInput.value = calculateAge(dateValue);
 }
 
-patientForm.addEventListener('submit', savePatient);
-resetBtn.addEventListener('click', resetForm);
-searchInput.addEventListener('input', (event) => {
-  renderPatients(event.target.value);
-});
-patientTableBody.addEventListener('click', handleTableActions);
-dateOfBirthInput.addEventListener('change', handleDobChange);
+function setStaffSession(token, staff) {
+  staffToken = token;
+  currentStaff = staff;
+  localStorage.setItem('patientcare_staff_token', token);
+  localStorage.setItem('patientcare_staff_user', JSON.stringify(staff));
+
+  if (staffUserName) {
+    staffUserName.textContent = staff.name || staff.username || 'Staff';
+  }
+
+  if (staffDashboardSection) {
+    staffDashboardSection.classList.remove('d-none');
+  }
+  if (staffLoginCard) {
+    staffLoginCard.classList.add('d-none');
+  }
+
+  loadStaffDashboard();
+}
+
+function clearStaffSession() {
+  staffToken = '';
+  currentStaff = null;
+  localStorage.removeItem('patientcare_staff_token');
+  localStorage.removeItem('patientcare_staff_user');
+
+  if (staffDashboardSection) {
+    staffDashboardSection.classList.add('d-none');
+  }
+  if (staffLoginCard) {
+    staffLoginCard.classList.remove('d-none');
+  }
+}
+
+async function loginStaff(event) {
+  event.preventDefault();
+
+  const username = document.getElementById('staffUsername').value.trim();
+  const password = document.getElementById('staffPassword').value.trim();
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/staff/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed.');
+    }
+
+    setStaffSession(data.token, data.staff);
+    showToast(data.message || 'Staff login successful.', 'success');
+  } catch (error) {
+    showToast(error.message || 'Staff login failed.', 'danger');
+    console.error('Staff login error:', error);
+  }
+}
+
+async function loadStaffDashboard() {
+  if (!staffToken) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/staff/dashboard`, {
+      headers: {
+        Authorization: `Bearer ${staffToken}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Unable to load staff dashboard.');
+    }
+
+    if (data.stats) {
+      const totalPatientsValue = document.getElementById('totalPatients');
+      const totalAppointmentsValue = document.getElementById('todayAppointments');
+      const totalDepartmentsValue = document.getElementById('totalDepartments');
+      if (totalPatientsValue) totalPatientsValue.textContent = data.stats.totalPatients;
+      if (totalAppointmentsValue) totalAppointmentsValue.textContent = data.stats.todaysAppointments;
+      if (totalDepartmentsValue) totalDepartmentsValue.textContent = data.stats.totalDepartments;
+    }
+
+    patients = data.patients || [];
+    appointments = data.appointments || [];
+    renderPatients(searchInput ? searchInput.value : '');
+    renderAppointments(appointments);
+  } catch (error) {
+    console.error('Staff dashboard load error:', error);
+    showToast(error.message || 'Unable to load staff dashboard.', 'danger');
+  }
+}
+
+if (patientForm) {
+  patientForm.addEventListener('submit', savePatient);
+}
+if (resetBtn) {
+  resetBtn.addEventListener('click', resetForm);
+}
+if (searchInput) {
+  searchInput.addEventListener('input', (event) => {
+    renderPatients(event.target.value);
+  });
+}
+if (patientTableBody) {
+  patientTableBody.addEventListener('click', handleTableActions);
+}
+if (dateOfBirthInput) {
+  dateOfBirthInput.addEventListener('change', handleDobChange);
+}
+if (staffLoginForm) {
+  staffLoginForm.addEventListener('submit', loginStaff);
+}
+if (staffLogoutBtn) {
+  staffLogoutBtn.addEventListener('click', clearStaffSession);
+}
+if (document.getElementById('newRegistrationBtn')) {
+  document.getElementById('newRegistrationBtn').addEventListener('click', () => {
+    hideSuccessCard();
+    resetForm();
+  });
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   const today = new Date();
-  appointmentDateInput.value = today.toISOString().split('T')[0];
-  loadPatients();
+  if (appointmentDateInput) {
+    appointmentDateInput.value = today.toISOString().split('T')[0];
+  }
+
+  if (staffToken && currentStaff) {
+    setStaffSession(staffToken, currentStaff);
+  } else {
+    clearStaffSession();
+  }
 });

@@ -10,6 +10,18 @@ const describeOrSkip = skipDb ? describe.skip : describe;
 describeOrSkip('Patients API (integration)', () => {
   let createdId = null;
 
+  test('POST /api/staff/login should validate credentials', async () => {
+    const res = await request(app).post('/api/staff/login').send({});
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toMatch(/username|password/i);
+  });
+
+  test('GET /api/staff/dashboard should require staff authentication', async () => {
+    const res = await request(app).get('/api/staff/dashboard');
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toMatch(/login|auth|token/i);
+  });
+
   test('GET /api/patients should return array', async () => {
     const res = await request(app).get('/api/patients');
     expect(res.statusCode).toBe(200);

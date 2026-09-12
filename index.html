@@ -35,12 +35,9 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
             <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="#patients">Patients</a></li>
-            <li class="nav-item"><a class="nav-link" href="#registration-form">Add Patient</a></li>
+            <li class="nav-item"><a class="nav-link" href="#registration-form">Patient Registration</a></li>
             <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-            <li class="nav-item ms-lg-3">
-              <button class="btn btn-primary btn-sm px-3" type="button">Login</button>
-            </li>
+            <li class="nav-item"><a class="nav-link" href="#staff-login">Staff Login</a></li>
           </ul>
         </div>
       </div>
@@ -51,11 +48,11 @@
         <div class="row align-items-center g-4">
           <div class="col-lg-6">
             <p class="eyebrow">Healthcare Management</p>
-            <h1>Patient Management</h1>
-            <p class="lead mb-4">Register and manage patient information easily.</p>
+            <h1>Modern patient care, simplified.</h1>
+            <p class="lead mb-4">Streamline registration, appointments, and staff coordination in one secure healthcare portal.</p>
             <div class="hero-actions d-flex flex-wrap gap-3">
               <a href="#registration-form" class="btn btn-primary px-4 py-2">Register Patient</a>
-              <a href="#patients" class="btn btn-outline-primary px-4 py-2">View Patients</a>
+              <a href="#staff-login" class="btn btn-outline-primary px-4 py-2">Staff Access</a>
             </div>
           </div>
 
@@ -67,11 +64,54 @@
                 Keep patient details, appointments, and contact information organized in one
                 simple dashboard.
               </p>
+              <div class="stats-strip">
+                <div>
+                  <strong>24/7</strong>
+                  <span>Patient intake</span>
+                </div>
+                <div>
+                  <strong>Secure</strong>
+                  <span>Staff login</span>
+                </div>
+                <div>
+                  <strong>Live</strong>
+                  <span>Appointments</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </header>
+
+    <section id="features" class="py-5">
+      <div class="container">
+        <div class="section-heading text-center mb-5">
+          <p class="eyebrow d-inline-block">Why PatientCare</p>
+          <h2>Built for better patient experiences</h2>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <h3>Fast registration</h3>
+            <p>Collect patient details quickly with a guided form and built-in validation for cleaner records.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure staff access</h3>
+            <p>Staff-only dashboards keep sensitive patient information protected and available only to authorized users.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3>Appointment tracking</h3>
+            <p>Monitor department visits, doctors, and appointment schedules from a single operational view.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <main>
       <section id="registration-form" class="py-5">
@@ -245,71 +285,166 @@
         </div>
       </section>
 
-      <section class="summary-section pb-5">
+      <section id="success-section" class="py-5 d-none">
         <div class="container">
-          <div class="row g-4">
-            <div class="col-md-4">
-              <div class="summary-card">
-                <div class="summary-icon text-primary">👥</div>
-                <p>Total Patients</p>
-                <h3 id="totalPatients">0</h3>
+          <div class="card border-0 shadow-sm custom-card">
+            <div class="card-body p-4 p-md-5 text-center">
+              <div class="mb-3 text-success fs-1">✓</div>
+              <h2>Registration Successful</h2>
+              <div class="row justify-content-center mt-4">
+                <div class="col-md-8 text-start">
+                  <p><strong>Patient ID:</strong> <span id="successPatientId">-</span></p>
+                  <p><strong>Patient Name:</strong> <span id="successPatientName">-</span></p>
+                  <p><strong>Department:</strong> <span id="successDepartment">-</span></p>
+                  <p><strong>Appointment Date:</strong> <span id="successAppointmentDate">-</span></p>
+                  <p><strong>Appointment Time:</strong> <span id="successAppointmentTime">-</span></p>
+                </div>
               </div>
+              <button id="newRegistrationBtn" type="button" class="btn btn-primary mt-3">Register Another Patient</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="staff-login" class="py-5">
+        <div class="container">
+          <div id="staffLoginCard" class="card border-0 shadow-sm custom-card mb-4">
+            <div class="card-body p-4 p-md-5">
+              <div class="section-heading text-center mb-4">
+                <h2>Staff Login</h2>
+              </div>
+
+              <form id="staffLoginForm" class="mx-auto" style="max-width: 420px;">
+                <div class="mb-3">
+                  <label for="staffUsername" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="staffUsername" placeholder="admin" required />
+                </div>
+                <div class="mb-3">
+                  <label for="staffPassword" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="staffPassword" placeholder="admin123" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+              </form>
+            </div>
+          </div>
+
+          <div id="staffDashboardSection" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <div>
+                <p class="mb-1 text-muted">Signed in as</p>
+                <h3 id="staffUserName" class="mb-0">Staff</h3>
+              </div>
+              <button id="staffLogoutBtn" type="button" class="btn btn-outline-danger">Logout</button>
             </div>
 
-            <div class="col-md-4">
-              <div class="summary-card">
-                <div class="summary-icon text-success">📅</div>
-                <p>Today's Appointments</p>
-                <h3 id="todayAppointments">0</h3>
-              </div>
-            </div>
+            <div class="admin-shell">
+              <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                  <div class="summary-card">
+                    <div class="summary-icon text-primary">👥</div>
+                    <p>Total Patients</p>
+                    <h3 id="totalPatients">0</h3>
+                  </div>
+                </div>
 
-            <div class="col-md-4">
-              <div class="summary-card">
-                <div class="summary-icon text-warning">🏥</div>
-                <p>Departments</p>
-                <h3 id="totalDepartments">0</h3>
+                <div class="col-md-4">
+                  <div class="summary-card">
+                    <div class="summary-icon text-success">📅</div>
+                    <p>Today's Appointments</p>
+                    <h3 id="todayAppointments">0</h3>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="summary-card">
+                    <div class="summary-icon text-warning">🏥</div>
+                    <p>Departments</p>
+                    <h3 id="totalDepartments">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card border-0 shadow-sm custom-card mb-4">
+                <div class="card-body p-4 p-md-5">
+                  <div class="section-heading text-center mb-4">
+                    <h2>Patient Records</h2>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-6 ms-auto">
+                      <input
+                        type="text"
+                        id="searchInput"
+                        class="form-control"
+                        placeholder="Search patient by name or Patient ID..."
+                      />
+                    </div>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle patient-table">
+                      <thead class="table-primary">
+                        <tr>
+                          <th>Patient ID</th>
+                          <th>Name</th>
+                          <th>Age</th>
+                          <th>Gender</th>
+                          <th>Phone</th>
+                          <th>Department</th>
+                          <th>Appointment Date</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="patientTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card border-0 shadow-sm custom-card">
+                <div class="card-body p-4 p-md-5">
+                  <div class="section-heading text-center mb-4">
+                    <h2>Appointment Management</h2>
+                  </div>
+
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle patient-table">
+                      <thead class="table-primary">
+                        <tr>
+                          <th>Appointment ID</th>
+                          <th>Patient Name</th>
+                          <th>Department</th>
+                          <th>Doctor</th>
+                          <th>Date</th>
+                          <th>Time</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="appointmentTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="patients" class="pb-5">
+      <section class="py-5 bg-light">
         <div class="container">
-          <div class="section-heading text-center mb-4">
-            <h2>Registered Patients</h2>
-          </div>
-
-          <div class="card border-0 shadow-sm custom-card">
-            <div class="card-body p-4 p-md-5">
-              <div class="row mb-3">
-                <div class="col-md-6 ms-auto">
-                  <input
-                    type="text"
-                    id="searchInput"
-                    class="form-control"
-                    placeholder="Search patient by name or Patient ID..."
-                  />
-                </div>
+          <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+              <div class="section-heading mb-4">
+                <h2>About PatientCare</h2>
               </div>
-
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle patient-table">
-                  <thead class="table-primary">
-                    <tr>
-                      <th>Patient ID</th>
-                      <th>Name</th>
-                      <th>Age</th>
-                      <th>Gender</th>
-                      <th>Phone</th>
-                      <th>Department</th>
-                      <th>Appointment Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="patientTableBody"></tbody>
-                </table>
+              <p class="about-text">PatientCare is a healthcare management system designed to simplify patient registration, appointment scheduling, and hospital record management. The platform helps patients submit information quickly while keeping staff access secure and organized.</p>
+            </div>
+            <div class="col-lg-6">
+              <div class="contact-card">
+                <h3>Contact</h3>
+                <p><strong>Address:</strong> 24 Wellness Avenue, City Hospital</p>
+                <p><strong>Phone:</strong> +91 98765 43210</p>
+                <p><strong>Email:</strong> support@patientcare.com</p>
               </div>
             </div>
           </div>
@@ -338,6 +473,21 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="patientDetailModal" tabindex="-1" aria-labelledby="patientDetailLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="patientDetailLabel">Patient Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="patientDetailBody"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

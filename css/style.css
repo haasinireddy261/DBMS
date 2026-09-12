@@ -110,6 +110,33 @@ img {
   text-align: center;
 }
 
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.stats-strip > div {
+  background: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-strip strong {
+  font-size: 1.1rem;
+  color: var(--primary-dark);
+}
+
+.stats-strip span {
+  font-size: 0.8rem;
+  color: var(--muted-text);
+}
+
 .hero-icon {
   width: 80px;
   height: 80px;
@@ -212,6 +239,13 @@ img {
   box-shadow: var(--shadow);
 }
 
+.admin-shell {
+  background: #f7fbff;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 20px;
+}
+
 .summary-icon {
   font-size: 2rem;
   margin-bottom: 10px;
@@ -227,6 +261,54 @@ img {
   margin-top: 8px;
   font-size: 2.2rem;
   font-weight: 700;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.feature-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 28px 22px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  height: 100%;
+}
+
+.feature-icon {
+  font-size: 2.4rem;
+  margin-bottom: 14px;
+}
+
+.feature-card h3 {
+  font-size: 1.35rem;
+  margin-bottom: 10px;
+  color: var(--primary-dark);
+}
+
+.feature-card p,
+.about-text,
+.contact-card p {
+  color: var(--muted-text);
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+.contact-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+.contact-card h3 {
+  color: var(--primary-dark);
+  margin-bottom: 16px;
 }
 
 .patient-table {
@@ -270,6 +352,10 @@ img {
     grid-template-columns: 1fr;
   }
 
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
   .hero-section {
     padding-top: 70px;
   }
@@ -278,6 +364,10 @@ img {
 @media (max-width: 767.98px) {
   .hero-section {
     text-align: center;
+  }
+
+  .stats-strip {
+    grid-template-columns: 1fr;
   }
 
   .hero-actions {
